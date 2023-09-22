@@ -1,0 +1,169 @@
+<script type="text/x-red" data-template-name="u-by-moen-in">
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Name">
+  </div>
+  <div class="form-row">
+    <label for="node-input-account"><i class="fa fa-person"></i>U by Moen Account</label>
+    <input type="text" id="node-input-account" placeholder="Account">
+  </div>
+  <div class="form-row">
+    <label for="showers"><i class="fa fa-person"></i>Shower</label>
+    <select id="showers" placeholder="Shower"></select>
+
+    <input type="hidden" id="node-input-shower">
+  </div>
+</script>
+
+<script type="text/javascript">
+  RED.nodes.registerType('u-by-moen-in', {
+    category: 'input',
+    defaults: {
+      name: { required: false },
+      account: {
+        value: 'U by Moen Account',
+        required: true,
+        type: 'u-by-moen-account'
+      },
+      shower: { required: true }
+    },
+    color: '#f49242',
+    inputs: 0,
+    outputs: 1,
+    icon: 'shower.png',
+
+    label: function () {
+      return this.name || 'U by Moen Shower';
+    },
+    oneditprepare: function () {
+      let account = RED.nodes.node($('#node-input-account').val());
+
+      $('#node-input-account').change(() => {
+        refreshShowers();
+      });
+
+      $('#showers').change(() => {
+        let shower = $('#showers option:selected').first().val();
+        $('#node-input-shower').val(shower);
+      });
+
+      function refreshShowers() {
+        let account = RED.nodes.node($('#node-input-account').val());
+
+        if (!account) {
+          $('#showers').empty();
+          $('#node-input-shower').val(null);
+          return;
+        }
+
+        $.getJSON('u-by-moen/showers', { account_id: account.id })
+          .done(data => {
+            $('#showers').empty();
+
+            let selected = $('#node-input-shower').val();
+            let select = $('#showers');
+            data.forEach(function (shower) {
+              select.append(
+                $('<option>').val(shower.serial_number).text(shower.name)
+              );
+            });
+
+            if (
+              typeof selected === 'string' &&
+              selected.length &&
+              data.find(s => s.serial_number == selected) === undefined
+            ) {
+              select.prepend(
+                $('<option/>')
+                  .val(selected)
+                  .text('Unknown "' + selected + '"')
+              );
+            }
+
+            select.val(selected);
+          })
+          .fail(function (err) {
+            RED.notify(err.responseText, 'error');
+          });
+      }
+
+      // var htmlID = '#node-input-lightID';
+      // var htmlText =
+      //   '<input type="text" id="node-input-lightID" placeholder="Light ID" style="width: 100%;">';
+      // var htmlCombo =
+      //   '<select            id="node-input-lightID" placeholder="Light ID" style="width: 100%;"/>';
+      // function enableCombobox() {
+      //   var val = $(htmlID).val();
+      //   var serverConfig = RED.nodes.node($('#node-input-server').val());
+      //   if (serverConfig && serverConfig.id) {
+      //     $.getJSON('node-lifx/lights', { server: serverConfig.id })
+      //       .done(function (data) {
+      //         function findFunc(light) {
+      //           return light.id === val;
+      //         }
+      //         function sortFunc(a, b) {
+      //           return (a.name || a.id).localeCompare(b.name || b.id);
+      //         }
+      //         // No data returned
+      //         if (!data || data.length <= 0) {
+      //           RED.notify('No lights found', 'error');
+      //           return;
+      //         }
+      //         // Convert to select
+      //         $('#node-input-lookup-lights > i')
+      //           .toggleClass('fa-search', false)
+      //           .toggleClass('fa-edit', true);
+      //         $(htmlID).replaceWith(htmlCombo);
+      //         data = data.sort(sortFunc);
+      //         // Add option
+      //         var input = $(htmlID);
+      //         data.forEach(function (light) {
+      //           input.append(
+      //             $('<option>')
+      //               .val(light.id)
+      //               .text(
+      //                 (light.name || light.id) +
+      //                   (light.info ? ' (' + light.info + ')' : '')
+      //               )
+      //           );
+      //         });
+      //         // Do we have an value, check if value match any existing and if not add it as unknown entry
+      //         if (
+      //           typeof val === 'string' &&
+      //           val.length &&
+      //           data.find(findFunc) === undefined
+      //         ) {
+      //           input.prepend(
+      //             $('<option/>')
+      //               .val(val)
+      //               .text('Unknown "' + val + '"')
+      //           );
+      //         }
+      //         // Mark current value
+      //         input.val(val);
+      //       })
+      //       .fail(function (err) {
+      //         RED.notify(err.responseText, 'error');
+      //       });
+      //   }
+      // }
+      // function enableTextbox() {
+      //   var val = $(htmlID).val();
+      //   // Convert to text
+      //   $('#node-input-lookup-lights > i')
+      //     .toggleClass('fa-search', true)
+      //     .toggleClass('fa-edit', false);
+      //   $(htmlID).replaceWith(htmlText);
+      //   // Insert current value
+      //   $(htmlID).val(val);
+      // }
+      // $('#node-input-lookup-lights').click(function () {
+      //   if ($(htmlID).attr('type') === 'text') {
+      //     enableCombobox();
+      //   } else {
+      //     enableTextbox();
+      //   }
+      // });
+    }
+  });
+</script>

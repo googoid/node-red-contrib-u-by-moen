@@ -1,0 +1,36 @@
+<script type="text/x-red" data-template-name="u-by-moen-account">
+  <div class="form-row">
+    <label for="node-config-input-email"><i class="fa fa-message"></i> Email</label>
+    <input type="email" id="node-config-input-email" placeholder="U by Moen Account Email">
+  </div>
+  <div class="form-row">
+    <label for="node-config-input-password"><i class="fa fa-key"></i> Password</label>
+    <input type="password" id="node-config-input-password" placeholder="U by Moen Account Email">
+  </div>
+</script>
+
+<!-- <script type="text/x-red" data-help-name="node-lifx-server">
+  <p>Server managing communication with Lifx lights.</p>
+  <p><b>Notice:</b> The server by default tries to bind to all addresses which makes it impossible to run multiple servers on the same host</p>
+  <ul>
+    <li><b>address</b> Optional address to bind to, makes it possible to run multiple servers</li>
+    <li><b>broadcast</b> Optional broadcast address, uses 255.255.255.255 by default</li>
+    <li><b>lights</b> Optional list of lights (ip addresses)</li>
+    <li><b>interval</b> Interval that is used to poll lights for changes (min 500ms)</li>
+    <li><b>name</b> Server name</li>
+  </ul>
+</script> -->
+
+<script type="text/javascript">
+  RED.nodes.registerType('u-by-moen-account', {
+    category: 'config',
+    defaults: {
+      // name: { value: 'U by Moen Account', required: true },
+      email: { required: true },
+      password: { required: true }
+    },
+    label: function () {
+      return this.email;
+    }
+  });
+</script>

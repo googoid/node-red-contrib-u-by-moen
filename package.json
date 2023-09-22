@@ -1,0 +1,19 @@
+{
+  "name": "red-contrib-u-by-moen",
+  "version": "0.0.1",
+  "description": "U by Moen Smart Shower Control",
+  "node-red": {
+    "nodes": {
+      "u-by-moen-in": "src/u-by-moen-in.js",
+      "u-by-moen-out": "src/u-by-moen-out.js",
+      "u-by-moen-account": "src/u-by-moen-account.js"
+    }
+  },
+  "homepage": "https://github.com/gooxid/node-red-contrib-u-by-moen",
+  "author": "GooX",
+  "license": "ISC",
+  "dependencies": {
+    "pusher-js": "^8.3.0",
+    "superagent": "^8.1.2"
+  }
+}
