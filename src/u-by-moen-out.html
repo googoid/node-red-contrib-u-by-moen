@@ -7,52 +7,25 @@
     <label for="node-input-account"><i class="fa fa-person"></i>U by Moen Account</label>
     <input type="text" id="node-input-account" placeholder="Account">
   </div>
-  <div class="form-row" style="white-space: nowrap;">
-    <label for="node-input-lightID"><i class="fa fa-lightbulb-o"></i> Light ID</label>
-    <div style="display: inline-block; position: relative; width: 70%; height: 20px;">
-      <div style="position: absolute; left: 0px; right: 40px;">
-        <input type="text" id="node-input-lightID" placeholder="Press button to list available lights" style="width: 100%;">
-      </div>
-      <a id="node-input-lookup-lights" class="editor-button" style="position: absolute; right: 0px; top: 0px;"><i class="fa fa-search"></i></a>
-    </div>
+  <div class="form-row">
+    <label for="showers"><i class="fa fa-person"></i>Shower</label>
+    <select id="showers" placeholder="Shower"></select>
+
+    <input type="hidden" id="node-input-shower">
   </div>
 </script>
 
-<!-- <script type="text/x-red" data-help-name="u-by-moen-out">
-  <p>Change state for an Lifx light bulb.</p>
-  <ul>
-    <li><code>on</code> On/Off boolean</li>
-    <li><code>hue</code> HUE (0-359)</li>
-    <li><code>sat></code>/<code>saturation</code> Saturation (0-100%)</li>
-    <li><code>bri</code>/<code>brightness</code> Brightness number (0-100%)</li>
-
-    <li><code>red</code> Red (0-255)</li>
-    <li><code>green</code> Green (0-255)</li>
-    <li><code>blue</code> Blue (0-255)</li>
-
-    <li><code>hex</code> Hex color</li>
-
-    <li><code>cr</code>, <code>mired</code> or <code>mirek</code> Mired temperature color (153-500)</li>
-    <li><code>kelvin</code> Kelvin temperature color (2200-6500)</li>
-
-    <li><code>duration</code> Transition time (ms)</li>
-  </ul>
-</script> -->
-
 <script type="text/javascript">
-  /* eslint require-jsdoc: 0 */
-  /* eslint-env jquery */
-
   RED.nodes.registerType('u-by-moen-out', {
     category: 'output',
     defaults: {
+      name: { required: false },
       account: {
         value: 'U by Moen Account',
         required: true,
         type: 'u-by-moen-account'
       },
-      name: { required: false },
-      serial_number: { required: true }
+      shower: { required: true }
     },
     color: '#f49242',
     inputs: 1,
@@ -63,6 +36,57 @@
       return this.name || 'U by Moen Shower';
     },
     oneditprepare: function () {
+      let account = RED.nodes.node($('#node-input-account').val());
+
+      $('#node-input-account').change(() => {
+        refreshShowers();
+      });
+
+      $('#showers').change(() => {
+        let shower = $('#showers option:selected').first().val();
+        $('#node-input-shower').val(shower);
+      });
+
+      function refreshShowers() {
+        let account = RED.nodes.node($('#node-input-account').val());
+
+        if (!account) {
+          $('#showers').empty();
+          $('#node-input-shower').val(null);
+          return;
+        }
+
+        $.getJSON('u-by-moen/showers', { account_id: account.id })
+          .done(data => {
+            $('#showers').empty();
+
+            let selected = $('#node-input-shower').val();
+            let select = $('#showers');
+            data.forEach(function (shower) {
+              select.append(
+                $('<option>').val(shower.serial_number).text(shower.name)
+              );
+            });
+
+            if (
+              typeof selected === 'string' &&
+              selected.length &&
+              data.find(s => s.serial_number == selected) === undefined
+            ) {
+              select.prepend(
+                $('<option/>')
+                  .val(selected)
+                  .text('Unknown "' + selected + '"')
+              );
+            }
+
+            select.val(selected);
+          })
+          .fail(function (err) {
+            RED.notify(err.responseText, 'error');
+          });
+      }
+
       // var htmlID = '#node-input-lightID';
       // var htmlText =
       //   '<input type="text" id="node-input-lightID" placeholder="Light ID" style="width: 100%;">';

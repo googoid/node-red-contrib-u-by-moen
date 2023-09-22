@@ -5,7 +5,7 @@
   </div>
   <div class="form-row">
     <label for="node-config-input-password"><i class="fa fa-key"></i> Password</label>
-    <input type="password" id="node-config-input-password" placeholder="U by Moen Account Email">
+    <input type="password" id="node-config-input-password" placeholder="U by Moen Account Password">
   </div>
 </script>
 
@@ -31,6 +31,20 @@
     },
     label: function () {
       return this.email;
-    }
+    },
+    oneditsave: async function () {
+      const email = $('#node-config-input-email').val();
+      const password = $('#node-config-input-password').val();
+
+      try {
+        const result = await $.post(
+          `/u-by-moen/create-client?account_id=${this.id}`,
+          { email, password }
+        );
+      } catch (e) {
+        throw e;
+      }
+    },
+    oneditcancel: function () {}
   });
 </script>

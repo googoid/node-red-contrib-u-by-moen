@@ -6,17 +6,22 @@ module.exports = function (RED) {
     let node = this;
     let debug = !!n.debug;
 
-    const client = clients.get(n.account);
-    client.once('authenticated', () => {
-      client
-        .getCredentials(n.shower)
-        .then(creds => {
-          client.subscribe(n.shower, creds);
-        })
-        .catch(node.error);
-    });
+    let client;
 
-    client.on('reported', onReported);
+    const config = RED.nodes.getNode(n.account);
+
+    if (config) {
+      client = config.client;
+
+      client.subscribe(n.shower);
+      client.on('reported', onReported);
+    }
+
+    // console.log(n);
+
+    // console.log();
+
+    // const client = clients.get(n.account);
 
     function onReported(data) {
       node.send({ payload: data });
@@ -26,8 +31,11 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, n);
 
     this.on('close', () => {
-      client.removeListener('reported', onReported);
-      client.unsubscribe();
+      if (client) {
+        client.removeListener('reported', onReported);
+        client.unsubscribe(n.shower);
+        client = null;
+      }
     });
   }
 
