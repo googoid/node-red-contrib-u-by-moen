@@ -1,5 +1,5 @@
 {
-  "name": "red-contrib-u-by-moen",
+  "name": "node-red-contrib-u-by-moen",
   "version": "0.0.1",
   "description": "U by Moen Smart Shower Control",
   "node-red": {
